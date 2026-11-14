@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elite Point Property Services • Documento en Línea</title>
+    <title>Elite Point Property Services • Factura</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -26,47 +26,31 @@
     <main id="invoice-container" class="max-w-3xl mx-auto bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden p-6 sm:p-12 space-y-8">
         <div id="loading-state" class="text-center py-20 space-y-4">
             <i class="fa-solid fa-circle-notch fa-spin text-3xl text-forest-900"></i>
-            <p class="text-sm font-bold text-slate-500">Cargando documento oficial...</p>
+            <p class="text-sm font-bold text-slate-500">Cargando factura...</p>
         </div>
     </main>
 
     <script>
-        const API_URL = "https://elite-api.mtua3458.workers.dev";
-
-        async function loadDocument() {
+        function loadDocument() {
             const urlParams = new URLSearchParams(window.location.search);
             const docNum = urlParams.get('doc');
             const container = document.getElementById('invoice-container');
 
-            if (!docNum) {
-                container.innerHTML = `
-                    <div class="text-center py-16 space-y-3">
-                        <i class="fa-solid fa-triangle-exclamation text-4xl text-amber-500"></i>
-                        <h2 class="text-lg font-bold text-forest-900">Documento no especificado</h2>
-                        <p class="text-xs text-slate-500">Por favor, asegúrate de abrir el enlace correcto enviado por Elite Point Property Services.</p>
-                    </div>
-                `;
-                return;
-            }
-
             let docData = null;
 
-            // 1. Buscar primero en el almacenamiento local (por si se generó en tu mismo navegador)
-            const localStored = localStorage.getItem(`elite_doc_${docNum}`);
-            if (localStored) {
-                try { docData = JSON.parse(localStored); } catch(e){}
+            // 1. Busca en la memoria de la computadora o teléfono donde se creó
+            if (docNum) {
+                const localStored = localStorage.getItem(`elite_doc_${docNum}`);
+                if (localStored) {
+                    try { docData = JSON.parse(localStored); } catch(e){}
+                }
             }
 
-            // 2. Si no está local, buscar en la API de Cloudflare Worker
-            if (!docData) {
+            // 2. Si no está en el navegador, revisa si los datos vienen ocultos en el enlace
+            if (!docData && urlParams.get('data')) {
                 try {
-                    const response = await fetch(`${API_URL}/?doc=${docNum}`);
-                    if (response.ok) {
-                        docData = await response.json();
-                    }
-                } catch (err) {
-                    console.error("Error conectando con la API:", err);
-                }
+                    docData = JSON.parse(atob(urlParams.get('data')));
+                } catch(e){}
             }
 
             if (!docData) {
@@ -74,7 +58,7 @@
                     <div class="text-center py-16 space-y-3">
                         <i class="fa-solid fa-file-circle-xmark text-4xl text-red-500"></i>
                         <h2 class="text-lg font-bold text-forest-900">Documento no encontrado</h2>
-                        <p class="text-xs text-slate-500">No pudimos encontrar el registro #${docNum} en nuestros servidores.</p>
+                        <p class="text-xs text-slate-500">No pudimos encontrar este registro. Asegúrate de abrir el enlace oficial.</p>
                     </div>
                 `;
                 return;
@@ -133,16 +117,13 @@
             let tax = matSub * 0.07;
             let grandTotal = matSub + tax + laborSub;
             const docTypeLabel = doc.type === 'estimate' ? 'PRESUPUESTO (ESTIMATE)' : 'FACTURA (INVOICE)';
-
-            let paymentLinks = JSON.parse(localStorage.getItem('elite_pay_links') || '[]');
-            let stripeLink = doc.paymentLink || (paymentLinks.length > 0 ? paymentLinks[0].url : '#');
-            let logoSrc = doc.customLogo || "1000409393.jpg";
+            let stripeLink = doc.paymentLink || '#';
 
             container.innerHTML = `
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b-2 border-forest-900 pb-6">
                     <div class="flex items-center gap-3">
-                        <div class="bg-forest-950/90 border border-gold-500/40 p-2 rounded-xl shadow-inner">
-                            <img src="${logoSrc}" alt="Elite Point" class="h-12 w-auto object-contain">
+                        <div class="bg-forest-950/90 border border-gold-500/40 p-2.5 rounded-2xl shadow-inner flex items-center justify-center">
+                            <span class="font-display font-bold text-gold-400 text-sm px-2 tracking-wider">ELITE POINT</span>
                         </div>
                         <div>
                             <span class="px-2.5 py-0.5 bg-forest-900 text-gold-400 text-[10px] font-extrabold rounded-full uppercase">${docTypeLabel}</span>
@@ -152,7 +133,6 @@
                     <div class="text-right">
                         <p class="text-xs font-bold text-slate-500">Documento N°: <span class="text-forest-900 font-extrabold">#${doc.number}</span></p>
                         <p class="text-xs font-medium text-slate-600">Fecha: ${doc.date || 'N/A'}</p>
-                        <p class="text-xs font-medium text-slate-600">Vencimiento: ${doc.dueDate || doc.terms || 'Due on Receipt'}</p>
                     </div>
                 </div>
 
@@ -169,16 +149,8 @@
                     </div>
                 </div>
 
-                ${doc.housePhoto ? `
-                    <div class="space-y-2 bg-slate-50 p-4 rounded-2xl border border-slate-200">
-                        <h3 class="text-[11px] font-extrabold text-forest-900 uppercase tracking-wider"><i class="fa-solid fa-house-chimney text-gold-600"></i> Propiedad / Alcance visual:</h3>
-                        <img src="${doc.housePhoto}" class="max-h-52 rounded-xl border border-slate-200 object-contain mx-auto bg-white p-2 shadow-sm" alt="Property">
-                        ${doc.houseCaption ? `<p class="text-xs text-slate-600 italic text-center pt-1">${doc.houseCaption}</p>` : ''}
-                    </div>
-                ` : ''}
-
                 <div class="space-y-3">
-                    <h3 class="text-xs font-extrabold text-forest-900 uppercase tracking-wider border-b border-slate-200 pb-2">Desglose de Servicios, Materiales y Mano de Obra</h3>
+                    <h3 class="text-xs font-extrabold text-forest-900 uppercase tracking-wider border-b border-slate-200 pb-2">Desglose de Servicios y Materiales</h3>
                     <div class="space-y-3">${itemsHTML}</div>
                 </div>
 
