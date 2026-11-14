@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elite Point Property Services • Factura</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Elite Point Property Services • Document View</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -20,171 +20,281 @@
             }
         }
     </script>
+    <style>
+        @media print {
+            body { background-color: #ffffff !important; color: #000000 !important; }
+            #print-document-sheet { border: none !important; box-shadow: none !important; padding: 0 !important; width: 100% !important; max-width: 100% !important; }
+            .no-print, button, header { display: none !important; }
+        }
+    </style>
 </head>
-<body class="bg-slate-100 text-slate-800 font-sans antialiased min-h-screen py-8 px-4">
+<body class="bg-slate-100 text-slate-800 font-sans antialiased min-h-screen pb-24">
 
-    <main id="invoice-container" class="max-w-3xl mx-auto bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden p-6 sm:p-12 space-y-8">
-        <div id="loading-state" class="text-center py-20 space-y-4">
-            <i class="fa-solid fa-circle-notch fa-spin text-3xl text-forest-900"></i>
-            <p class="text-sm font-bold text-slate-500">Cargando factura...</p>
+    <!-- BARRA SUPERIOR PÚBLICA -->
+    <header class="no-print bg-forest-900 text-white border-b-2 border-gold-500 sticky top-0 z-30 shadow-md w-full">
+        <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between gap-2">
+            <span class="font-display font-bold text-xs text-gold-400 tracking-wider">ELITE POINT PROPERTY SERVICES</span>
+            <div class="flex items-center gap-2">
+                <button onclick="window.print()" class="px-3 py-2 text-xs font-extrabold text-forest-950 bg-gold-500 hover:bg-gold-400 rounded-xl transition-all shadow flex items-center gap-1.5">
+                    <i class="fa-solid fa-print"></i> Print / PDF
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- HOJA PRINCIPAL DE LA FACTURA -->
+    <main class="max-w-3xl mx-auto px-2 sm:px-4 pt-6">
+        <div id="print-document-sheet" class="bg-white rounded-3xl shadow-lg border border-slate-200 p-6 sm:p-10 space-y-6">
+            
+            <div class="flex flex-col sm:flex-row justify-between items-start gap-6 border-b border-slate-200 pb-6">
+                <div class="space-y-3">
+                    <div class="bg-forest-950 p-2.5 rounded-2xl border border-gold-500/40 shadow-inner inline-block">
+                        <img id="pdf-logo-img" src="1000409393.jpg" onerror="this.style.display='none'; document.getElementById('pdf-logo-fallback').classList.remove('hidden');" alt="Elite Point" class="h-12 w-auto object-contain">
+                        <span id="pdf-logo-fallback" class="hidden font-display font-bold text-gold-400 text-sm px-2">ELITE POINT</span>
+                    </div>
+                    <div>
+                        <h2 class="font-display font-bold text-sm text-forest-900 tracking-wider">ELITE POINT PROPERTY SERVICES</h2>
+                        <p id="comp-name" class="text-xs font-bold text-slate-700 mt-1">Javier Maturana</p>
+                        <p id="comp-role" class="text-[11px] text-slate-500 italic">Owner & Operations Manager</p>
+                    </div>
+                    <div class="text-[11px] text-slate-600 space-y-0.5 font-medium">
+                        <p><i class="fa-solid fa-phone text-gold-600 mr-1.5 w-3"></i> (463) 287-8167</p>
+                        <p><i class="fa-solid fa-envelope text-gold-600 mr-1.5 w-3"></i> info@elitepointpropertyservices.com</p>
+                        <p><i class="fa-solid fa-globe text-gold-600 mr-1.5 w-3"></i> elitepointpropertyservices.com</p>
+                    </div>
+                </div>
+
+                <div class="text-left sm:text-right space-y-1.5 w-full sm:w-auto">
+                    <h1 id="doc-title-header" class="font-display font-bold text-xl sm:text-2xl text-forest-900 uppercase tracking-wider">ESTIMATE</h1>
+                    <p class="text-xs font-extrabold text-gold-700"><span id="pdf-doc-number">--</span></p>
+                    <div class="text-xs text-slate-500 space-y-0.5 pt-1">
+                        <p id="pdf-doc-date">Date: --/--/----</p>
+                        <p id="pdf-doc-due">Valid Until: --/--/----</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200/60 text-xs">
+                <div>
+                    <span class="block font-bold text-slate-400 uppercase text-[10px]">Client Details:</span>
+                    <strong id="pdf-client-name" class="text-sm font-bold text-forest-900">--</strong>
+                    <p id="pdf-client-address" class="text-slate-600 mt-0.5">--</p>
+                </div>
+                <div class="sm:text-right">
+                    <span class="block font-bold text-slate-400 uppercase text-[10px]">Contact Info:</span>
+                    <p id="pdf-client-email" class="text-slate-700">--</p>
+                    <p id="pdf-client-phone" class="text-slate-700">--</p>
+                </div>
+            </div>
+
+            <div id="pdf-house-section" class="hidden space-y-2">
+                <h3 class="text-xs font-extrabold text-forest-900 uppercase tracking-wider">Property / Evaluated Area</h3>
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-center space-y-2">
+                    <img id="pdf-house-img" class="max-h-64 rounded-xl object-contain mx-auto border border-slate-200" alt="Property Photo">
+                    <p id="pdf-house-caption" class="text-xs text-slate-600 italic"></p>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <h3 class="text-xs font-extrabold text-forest-900 uppercase tracking-wider">Scope of Work & Materials</h3>
+                <div class="overflow-x-auto border border-slate-200 rounded-2xl">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead class="bg-slate-50 text-slate-400 uppercase text-[10px] border-b border-slate-200">
+                            <tr>
+                                <th class="py-2.5 px-3">Description</th>
+                                <th class="py-2.5 px-3 text-center">Qty</th>
+                                <th class="py-2.5 px-3 text-right">Unit Price</th>
+                                <th class="py-2.5 px-3 text-right">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pdf-items-tbody" class="divide-y divide-slate-100"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-between items-start gap-6 pt-4 border-t border-slate-200">
+                <div class="space-y-1 text-xs text-slate-500 w-full sm:w-1/2">
+                    <p><strong>Payment Terms:</strong> <span id="pdf-terms">Due on Receipt</span></p>
+                    <div id="pdf-payment-link-box" class="hidden pt-2">
+                        <a id="pdf-payment-btn" href="#" target="_blank" class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-xl text-xs shadow transition-all">
+                            <i class="fa-solid fa-credit-card"></i> Pay Online with Card
+                        </a>
+                    </div>
+                </div>
+                <div class="w-full sm:w-72 bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-1.5 text-xs">
+                    <div class="flex justify-between text-slate-600">
+                        <span>Materials Subtotal:</span>
+                        <strong id="pdf-subtotal">$0.00</strong>
+                    </div>
+                    <div class="flex justify-between text-slate-600">
+                        <span>Indiana Sales Tax (7%):</span>
+                        <strong id="pdf-tax">$0.00</strong>
+                    </div>
+                    <div class="flex justify-between text-slate-600 border-b border-slate-200 pb-1.5">
+                        <span>Labor Workmanship:</span>
+                        <strong id="pdf-labor">$0.00</strong>
+                    </div>
+                    <div class="flex justify-between text-base font-extrabold text-forest-900 pt-1">
+                        <span>Grand Total:</span>
+                        <span id="pdf-total" class="text-gold-700">$0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-6 border-t border-slate-100 text-center text-[10px] text-slate-400 space-y-0.5">
+                <p class="font-bold text-forest-900">Elite Point Property Services</p>
+                <p>A DBA of Global Trading Solutions LLC • Professional Property Maintenance & Installation</p>
+            </div>
+
         </div>
     </main>
 
+    <!-- ESTADO DE ERROR (SI NO SE ENCUENTRA) -->
+    <div id="error-view" class="hidden max-w-md mx-auto mt-20 bg-white rounded-3xl shadow-xl border border-slate-200 p-8 text-center space-y-4">
+        <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto text-2xl">
+            <i class="fa-solid fa-file-circle-xmark"></i>
+        </div>
+        <h2 class="font-display font-bold text-lg text-forest-900">Documento no encontrado</h2>
+        <p id="error-desc" class="text-xs text-slate-500">No pudimos encontrar el registro solicitado en nuestros servidores.</p>
+    </div>
+
     <script>
-        function loadDocument() {
+        const serviceTranslations = {
+            "Christmas Lights Installation & Removal": "Christmas Lights Installation & Removal",
+            "Roofline Lighting Service": "Roofline Lighting Service",
+            "Trees & Landscaping Lighting": "Trees & Landscaping Lighting",
+            "Wreaths & Holiday Decor": "Wreaths & Holiday Decor",
+            "General Landscaping & Maintenance": "General Landscaping & Maintenance",
+            "Home Improvement Services": "Home Improvement Services",
+            "✨ Servicio Personalizado (Custom Service)": "Custom Professional Service"
+        };
+
+        const materialTranslations = {
+            "Commercial Grade Warm White LED Bulbs": "Commercial Grade Warm White LED Bulbs",
+            "Commercial Grade Multi-Color LED Bulbs": "Commercial Grade Multi-Color LED Bulbs",
+            "Heavy Duty Intermediate C7/C9 Spool Wire": "Heavy Duty Intermediate C7/C9 Spool Wire",
+            "All-Purpose Mounting Clips & Fasteners": "All-Purpose Mounting Clips & Fasteners",
+            "Digital Programmable Outdoor Timer": "Digital Programmable Outdoor Timer",
+            "Waterproof Connection Box & Safety Enclosures": "Waterproof Connection Box & Safety Enclosures",
+            "Holiday Wreaths & Garlands Decor": "Holiday Wreaths & Garlands Decor",
+            "✨ Material Personalizado (Custom Material)": "Custom Material"
+        };
+
+        function translateService(originalName) { return serviceTranslations[originalName] || originalName; }
+        function translateMaterial(originalName) { return materialTranslations[originalName] || originalName; }
+
+        function loadPublicDocument() {
             const urlParams = new URLSearchParams(window.location.search);
             const docNum = urlParams.get('doc');
-            const container = document.getElementById('invoice-container');
+            const dataParam = urlParams.get('data');
 
-            let docData = null;
+            let currentDocData = null;
 
-            // 1. Busca en la memoria de la computadora o teléfono donde se creó
-            if (docNum) {
-                const localStored = localStorage.getItem(`elite_doc_${docNum}`);
-                if (localStored) {
-                    try { docData = JSON.parse(localStored); } catch(e){}
+            // 1. Si el enlace trae los datos empaquetados de forma invisible
+            if (dataParam) {
+                try {
+                    currentDocData = JSON.parse(decodeURIComponent(atob(dataParam).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+                } catch(e) {
+                    console.error("Error al decodificar datos", e);
                 }
             }
 
-            // 2. Si no está en el navegador, revisa si los datos vienen ocultos en el enlace
-            if (!docData && urlParams.get('data')) {
-                try {
-                    docData = JSON.parse(atob(urlParams.get('data')));
-                } catch(e){}
+            // 2. Si no vienen empaquetados, buscar en la memoria local del navegador
+            if (!currentDocData && docNum) {
+                currentDocData = JSON.parse(localStorage.getItem(`elite_doc_${docNum}`));
             }
 
-            if (!docData) {
-                container.innerHTML = `
-                    <div class="text-center py-16 space-y-3">
-                        <i class="fa-solid fa-file-circle-xmark text-4xl text-red-500"></i>
-                        <h2 class="text-lg font-bold text-forest-900">Documento no encontrado</h2>
-                        <p class="text-xs text-slate-500">No pudimos encontrar este registro. Asegúrate de abrir el enlace oficial.</p>
-                    </div>
-                `;
+            // Si de ninguna forma existe, mostrar pantalla de error limpia
+            if (!currentDocData) {
+                document.getElementById('print-document-sheet').classList.add('hidden');
+                document.getElementById('error-view').classList.remove('hidden');
+                if(docNum) {
+                    document.getElementById('error-desc').innerText = `No pudimos encontrar el registro #${docNum} en nuestros servidores.`;
+                }
                 return;
             }
 
-            renderInvoiceView(docData);
-        }
-
-        function renderInvoiceView(doc) {
-            const container = document.getElementById('invoice-container');
+            // Renderizar la factura visualmente
+            const isEstimate = currentDocData.type === 'estimate';
+            document.getElementById('doc-title-header').innerText = isEstimate ? 'ESTIMATE' : 'INVOICE';
+            document.getElementById('pdf-doc-number').innerText = currentDocData.number;
+            document.getElementById('pdf-doc-date').innerText = `Date: ${currentDocData.date || 'N/A'}`;
+            document.getElementById('pdf-doc-due').innerText = `${isEstimate ? 'Valid Until' : 'Due Date'}: ${currentDocData.dueDate || 'N/A'}`;
             
-            let matSub = 0, laborSub = 0;
-            let itemsHTML = '';
+            document.getElementById('pdf-client-name').innerText = currentDocData.clientName;
+            document.getElementById('pdf-client-address').innerText = currentDocData.clientAddress || 'No address specified';
+            document.getElementById('pdf-client-email').innerText = currentDocData.clientEmail ? `Email: ${currentDocData.clientEmail}` : '';
+            document.getElementById('pdf-client-phone').innerText = currentDocData.clientPhone ? `Phone: +1 ${currentDocData.clientPhone}` : '';
+            document.getElementById('pdf-terms').innerText = currentDocData.terms || 'Due on Receipt';
 
-            if (doc.items) {
-                doc.items.forEach((item, idx) => {
-                    let serviceTitle = doc.serviceOptions ? doc.serviceOptions[item.serviceIndex] : "Service";
-                    if (item.serviceIndex === 6 && item.customService) {
-                        serviceTitle = item.customService;
-                    }
+            if (isEstimate && currentDocData.housePhoto) {
+                document.getElementById('pdf-house-section').classList.remove('hidden');
+                document.getElementById('pdf-house-img').src = currentDocData.housePhoto;
+                document.getElementById('pdf-house-caption').innerText = currentDocData.houseCaption || '';
+            }
 
-                    laborSub += (item.laborRate || 0);
+            if (currentDocData.paymentLink) {
+                document.getElementById('pdf-payment-link-box').classList.remove('hidden');
+                document.getElementById('pdf-payment-btn').href = currentDocData.paymentLink;
+            }
 
-                    let materialsRows = '';
+            const tbody = document.getElementById('pdf-items-tbody');
+            tbody.innerHTML = '';
+
+            let matSubtotal = 0;
+            let laborTotal = 0;
+
+            if (currentDocData.items) {
+                currentDocData.items.forEach((item, sIndex) => {
+                    const originalServName = item.serviceIndex === currentDocData.serviceOptions.length - 1 
+                        ? (item.customService || 'Custom Service') 
+                        : currentDocData.serviceOptions[item.serviceIndex];
+                    
+                    const servName = translateService(originalServName);
+                    laborTotal += (item.laborRate || 0);
+
+                    tbody.innerHTML += `
+                        <tr class="bg-slate-50/80 font-bold text-forest-900 border-t border-slate-200">
+                            <td colspan="3" class="py-2.5 px-3">Section #${sIndex + 1}: ${servName}</td>
+                            <td class="py-2.5 px-3 text-right">$${(item.laborRate || 0).toFixed(2)} <span class="text-[10px] text-slate-400 font-normal">(Labor)</span></td>
+                        </tr>
+                    `;
+
                     if (item.materials) {
                         item.materials.forEach(mat => {
-                            let matName = doc.materialOptions ? doc.materialOptions[mat.materialIndex] : "Material";
-                            if (mat.materialIndex === 7 && mat.customMaterial) {
-                                matName = mat.customMaterial;
-                            }
-                            let q = parseFloat(mat.qty) || 1;
-                            let sub = q * (mat.rate || 0);
-                            matSub += sub;
+                            const originalMatName = mat.materialIndex === currentDocData.materialOptions.length - 1 
+                                ? (mat.customMaterial || 'Custom Material') 
+                                : currentDocData.materialOptions[mat.materialIndex];
 
-                            materialsRows += `
-                                <div class="flex justify-between items-center text-xs py-1.5 pl-4 border-l-2 border-gold-500/50">
-                                    <span class="text-slate-600 font-medium">${matName} (Cant: ${mat.qty})</span>
-                                    <span class="font-bold text-slate-800">$${sub.toFixed(2)}</span>
-                                </div>
+                            const matName = translateMaterial(originalMatName);
+                            const qty = parseFloat(mat.qty) || 1;
+                            const rate = parseFloat(mat.rate) || 0;
+                            const lineTotal = qty * rate;
+                            matSubtotal += lineTotal;
+
+                            tbody.innerHTML += `
+                                <tr class="hover:bg-slate-50">
+                                    <td class="py-2 px-3 pl-6 text-slate-700">• ${matName}</td>
+                                    <td class="py-2 px-3 text-center text-slate-600">${qty}</td>
+                                    <td class="py-2 px-3 text-right text-slate-600">$${rate.toFixed(2)}</td>
+                                    <td class="py-2 px-3 text-right font-medium text-slate-800">$${lineTotal.toFixed(2)}</td>
+                                </tr>
                             `;
                         });
                     }
-
-                    itemsHTML += `
-                        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2.5">
-                            <div class="flex justify-between items-center border-b border-slate-200 pb-2">
-                                <span class="text-xs font-extrabold text-forest-900 uppercase">${idx + 1}. ${serviceTitle}</span>
-                                <span class="text-xs font-bold text-forest-900">Labor: $${(item.laborRate || 0).toFixed(2)}</span>
-                            </div>
-                            <div class="space-y-1.5 pt-1">${materialsRows}</div>
-                        </div>
-                    `;
                 });
             }
 
-            let tax = matSub * 0.07;
-            let grandTotal = matSub + tax + laborSub;
-            const docTypeLabel = doc.type === 'estimate' ? 'PRESUPUESTO (ESTIMATE)' : 'FACTURA (INVOICE)';
-            let stripeLink = doc.paymentLink || '#';
+            const tax = matSubtotal * 0.07;
+            const grandTotal = matSubtotal + tax + laborTotal;
 
-            container.innerHTML = `
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b-2 border-forest-900 pb-6">
-                    <div class="flex items-center gap-3">
-                        <div class="bg-forest-950/90 border border-gold-500/40 p-2.5 rounded-2xl shadow-inner flex items-center justify-center">
-                            <span class="font-display font-bold text-gold-400 text-sm px-2 tracking-wider">ELITE POINT</span>
-                        </div>
-                        <div>
-                            <span class="px-2.5 py-0.5 bg-forest-900 text-gold-400 text-[10px] font-extrabold rounded-full uppercase">${docTypeLabel}</span>
-                            <h1 class="font-display font-bold text-lg text-forest-900 mt-1">Elite Point Property Services</h1>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-xs font-bold text-slate-500">Documento N°: <span class="text-forest-900 font-extrabold">#${doc.number}</span></p>
-                        <p class="text-xs font-medium text-slate-600">Fecha: ${doc.date || 'N/A'}</p>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-5 rounded-2xl border border-slate-200">
-                    <div>
-                        <h3 class="text-[11px] font-extrabold text-forest-900 uppercase tracking-wider mb-1">Información del Cliente:</h3>
-                        <p class="text-sm font-bold text-slate-800">${doc.clientName}</p>
-                        <p class="text-xs text-slate-600">${doc.clientEmail || ''}</p>
-                        <p class="text-xs text-slate-600">${doc.clientPhone ? `+1 ${doc.clientPhone}` : ''}</p>
-                    </div>
-                    <div>
-                        <h3 class="text-[11px] font-extrabold text-forest-900 uppercase tracking-wider mb-1">Dirección de la Propiedad:</h3>
-                        <p class="text-xs text-slate-700 font-medium">${doc.clientAddress || 'No especificada'}</p>
-                    </div>
-                </div>
-
-                <div class="space-y-3">
-                    <h3 class="text-xs font-extrabold text-forest-900 uppercase tracking-wider border-b border-slate-200 pb-2">Desglose de Servicios y Materiales</h3>
-                    <div class="space-y-3">${itemsHTML}</div>
-                </div>
-
-                <div class="bg-forest-950 text-white p-6 rounded-3xl space-y-2.5 shadow-md">
-                    <div class="flex justify-between text-xs text-slate-300">
-                        <span>Subtotal Materiales:</span>
-                        <span class="font-bold">$${matSub.toFixed(2)}</span>
-                    </div>
-                    <div class="flex justify-between text-xs text-slate-300">
-                        <span>Impuestos (7%):</span>
-                        <span class="font-bold">$${tax.toFixed(2)}</span>
-                    </div>
-                    <div class="flex justify-between text-xs text-slate-300">
-                        <span>Mano de Obra (Labor):</span>
-                        <span class="font-bold">$${laborSub.toFixed(2)}</span>
-                    </div>
-                    <div class="flex justify-between text-base font-extrabold text-gold-400 pt-3 border-t border-forest-800">
-                        <span>Total General:</span>
-                        <span>$${grandTotal.toFixed(2)}</span>
-                    </div>
-                </div>
-
-                <div class="flex flex-col sm:flex-row gap-3 pt-4">
-                    <a href="${stripeLink}" target="_blank" class="flex-1 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-xl text-xs text-center transition-all shadow-md flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-credit-card"></i> Pagar con Tarjeta (Stripe)
-                    </a>
-                    <button onclick="window.print()" class="px-5 py-3.5 bg-slate-200 hover:bg-slate-300 text-slate-800 font-extrabold rounded-xl text-xs transition-all flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-print"></i> Imprimir / Guardar PDF
-                    </button>
-                </div>
-            `;
+            document.getElementById('pdf-subtotal').innerText = `$${matSubtotal.toFixed(2)}`;
+            document.getElementById('pdf-tax').innerText = `$${tax.toFixed(2)}`;
+            document.getElementById('pdf-labor').innerText = `$${laborTotal.toFixed(2)}`;
+            document.getElementById('pdf-total').innerText = `$${grandTotal.toFixed(2)}`;
         }
 
-        loadDocument();
+        loadPublicDocument();
     </script>
 </body>
 </html>
