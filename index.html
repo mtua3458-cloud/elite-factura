@@ -23,9 +23,7 @@
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans antialiased min-h-screen py-8 px-4">
 
-    <!-- CONTENEDOR PRINCIPAL QUE COPIA EL DISEÑO OFICIAL -->
     <main id="invoice-container" class="max-w-3xl mx-auto bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden p-6 sm:p-12 space-y-8">
-        <!-- Estado de carga inicial -->
         <div id="loading-state" class="text-center py-20 space-y-4">
             <i class="fa-solid fa-circle-notch fa-spin text-3xl text-forest-900"></i>
             <p class="text-sm font-bold text-slate-500">Cargando documento oficial...</p>
@@ -33,7 +31,7 @@
     </main>
 
     <script>
-        const API_URL = "https://elite-api.mtua3458.workers.dev"; // Tu Worker de Cloudflare KV
+        const API_URL = "https://elite-api.mtua3458.workers.dev";
 
         async function loadDocument() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -52,11 +50,14 @@
             }
 
             let docData = null;
+
+            // 1. Buscar primero en el almacenamiento local (por si se generó en tu mismo navegador)
             const localStored = localStorage.getItem(`elite_doc_${docNum}`);
             if (localStored) {
                 try { docData = JSON.parse(localStored); } catch(e){}
             }
 
+            // 2. Si no está local, buscar en la API de Cloudflare Worker
             if (!docData) {
                 try {
                     const response = await fetch(`${API_URL}/?doc=${docNum}`);
@@ -135,11 +136,9 @@
 
             let paymentLinks = JSON.parse(localStorage.getItem('elite_pay_links') || '[]');
             let stripeLink = doc.paymentLink || (paymentLinks.length > 0 ? paymentLinks[0].url : '#');
-
             let logoSrc = doc.customLogo || "1000409393.jpg";
 
             container.innerHTML = `
-                <!-- Cabecera Oficial IDÉNTICA -->
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b-2 border-forest-900 pb-6">
                     <div class="flex items-center gap-3">
                         <div class="bg-forest-950/90 border border-gold-500/40 p-2 rounded-xl shadow-inner">
@@ -157,7 +156,6 @@
                     </div>
                 </div>
 
-                <!-- Información del Cliente -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-5 rounded-2xl border border-slate-200">
                     <div>
                         <h3 class="text-[11px] font-extrabold text-forest-900 uppercase tracking-wider mb-1">Información del Cliente:</h3>
@@ -171,7 +169,6 @@
                     </div>
                 </div>
 
-                <!-- Foto de la propiedad (Si se cargó en el Presupuesto) -->
                 ${doc.housePhoto ? `
                     <div class="space-y-2 bg-slate-50 p-4 rounded-2xl border border-slate-200">
                         <h3 class="text-[11px] font-extrabold text-forest-900 uppercase tracking-wider"><i class="fa-solid fa-house-chimney text-gold-600"></i> Propiedad / Alcance visual:</h3>
@@ -180,13 +177,11 @@
                     </div>
                 ` : ''}
 
-                <!-- Servicios y Materiales -->
                 <div class="space-y-3">
                     <h3 class="text-xs font-extrabold text-forest-900 uppercase tracking-wider border-b border-slate-200 pb-2">Desglose de Servicios, Materiales y Mano de Obra</h3>
                     <div class="space-y-3">${itemsHTML}</div>
                 </div>
 
-                <!-- Resumen Financiero -->
                 <div class="bg-forest-950 text-white p-6 rounded-3xl space-y-2.5 shadow-md">
                     <div class="flex justify-between text-xs text-slate-300">
                         <span>Subtotal Materiales:</span>
@@ -206,7 +201,6 @@
                     </div>
                 </div>
 
-                <!-- Botones de Acción para el Cliente -->
                 <div class="flex flex-col sm:flex-row gap-3 pt-4">
                     <a href="${stripeLink}" target="_blank" class="flex-1 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold rounded-xl text-xs text-center transition-all shadow-md flex items-center justify-center gap-2">
                         <i class="fa-solid fa-credit-card"></i> Pagar con Tarjeta (Stripe)
